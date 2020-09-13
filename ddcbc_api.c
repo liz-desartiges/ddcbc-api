@@ -11,15 +11,19 @@
 /* ddcbc_bundle is a record of several ddca types necessary for this program.
  * Information about these types can be found in the ddcutil api.
  * underscored types are private and should'nt be used outside of this file. */
-typedef struct ddcbc_bundle {
+typedef struct 
+ddcbc_bundle {
     DDCA_Display_Info_List *dlist;
     DDCA_Display_Handle *_dhs;
     bool *supported;
     unsigned int ct; // exposed for 'getAll' 'setAll' commands
+    unsigned int supported_count;
 } ddcbc_bundle;
 
 /* in_bounds checks if dispno is valid. */
-bool in_bounds(ddcbc_bundle *bun, unsigned int dispno) { 
+bool 
+in_bounds(ddcbc_bundle *bun, unsigned int dispno) 
+{ 
     return dispno >= 1 && dispno <= bun->ct; 
 }
 
@@ -27,12 +31,15 @@ bool in_bounds(ddcbc_bundle *bun, unsigned int dispno) {
  * for all displays in the user's system. It also checks each display for the
  * existence of the brightness feature. It is the responsibility of the caller
  * to call 'ddcdb_bundle_free' to deallocate the struct returned. */
-ddcbc_bundle ddcbc_bundle_init() {
+ddcbc_bundle 
+ddcbc_bundle_init() 
+{
     ddcbc_bundle bun;
     ddca_get_display_info_list2(false, &bun.dlist);
     bun.ct = bun.dlist->ct;
     bun._dhs = malloc(bun.ct * sizeof(DDCA_Display_Handle));
     bun.supported = malloc(bun.ct * sizeof(DDCA_Display_Handle));
+    bun.supported_count = 0;
 
     // Open all displays and check for the brightness feature:
     for (unsigned int i = 0; i < bun.ct; i++) {
@@ -54,13 +61,17 @@ ddcbc_bundle ddcbc_bundle_init() {
             (BRIGHTNESS_FEATURE_CODE, dh, false, &info);
 
         bun.supported[i] = (ddcrc == 0) && support;
+        if (bun.supported[i])
+            bun.supported_count++;
     }
 
     return bun;
 }
 
 // ddcbc_bundle_free frees the memory space of the bundle.
-void ddcbc_bundle_free(ddcbc_bundle *bun) {
+void 
+ddcbc_bundle_free(ddcbc_bundle *bun) 
+{
     ddca_free_display_info_list(bun->dlist);
     // Close all displays:
     for (unsigned int i = 0; i < bun->ct; i++) {
@@ -79,18 +90,19 @@ typedef struct brightness_stats {
 
 /* ddcbc_bundle_get_brightness retrives the current and maximum brightness
  * values for a given monitor. */
-brightness_stats ddcbc_bundle_get_brightness(ddcbc_bundle *bun, 
-    unsigned int dispno) {
+brightness_stats 
+ddcbc_bundle_get_brightness(ddcbc_bundle *bun, unsigned int dispno) 
+{
 
     brightness_stats bs;
     bs.max_val = 0;
     bs.cur_val = 0;
     
     if (!in_bounds(bun, dispno)) {
-        fprintf(stderr, "Bad monitor number %u", dispno);
+        fprintf(stderr, "Bad monitor number %u\n", dispno);
         return bs;
     } else if (!bun->supported[dispno - 1]) {
-        fprintf(stderr, "Monitor %d not supported", dispno);
+        fprintf(stderr, "Monitor %d not supported\n", dispno);
         return bs;
     }
 
@@ -112,8 +124,10 @@ brightness_stats ddcbc_bundle_get_brightness(ddcbc_bundle *bun,
 }
 
 // ddcbc_bundle_set_brightness sets the brightness of a given monitor.
-void ddcbc_bundle_set_brightness(ddcbc_bundle *bun, unsigned int dispno, 
-    uint16_t new_val) {
+void 
+ddcbc_bundle_set_brightness(ddcbc_bundle *bun, unsigned int dispno, 
+    uint16_t new_val) 
+{
 
     brightness_stats bs = ddcbc_bundle_get_brightness(bun, dispno);
     if (new_val > bs.max_val) {
