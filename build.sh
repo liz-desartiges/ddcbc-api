@@ -1,5 +1,3 @@
 #!/bin/sh
 
-# requires an installaion of ddcutil.
-
-gcc -Wall -Wextra main.c -o ddcbc -lddcutil
+gcc ddcbc-api.c `pkg-config --cflags --libs glib-2.0 ddcutil` -o ddcbc-api
