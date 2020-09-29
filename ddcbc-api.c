@@ -47,8 +47,7 @@ ddcbc_display_get_brightness (ddcbc_display *disp)
 
 // ddcbc_bundle_set_brightness sets the brightness of a given monitor.
 DDCBC_Status 
-ddcbc_display_set_brightness (ddcbc_display *disp, guint dispno, 
-    guint16 new_val) 
+ddcbc_display_set_brightness (ddcbc_display *disp, guint16 new_val) 
 {
 
 	if (new_val > disp->max_val)
@@ -61,7 +60,7 @@ ddcbc_display_set_brightness (ddcbc_display *disp, guint dispno,
         BRIGHTNESS_CODE, new_val_high, new_val_low);
 
     if (ddcrc != 0)
-        return false;
+        return ddcrc;
 
 	disp->last_val = new_val;
     ddca_enable_verify(true);
@@ -126,9 +125,9 @@ ddcbc_display_list_free (ddcbc_display_list *dlist)
 	free (g_array_free (dlist->list, TRUE));
 }
 
-// ddcbc_display_list_get set last_val for all the displays in dlist.
+// ddcbc_display_list_get retrives the display at 'dispno'
 ddcbc_display* 
-ddcbc_display_list_get_by_no (ddcbc_display_list *dlist, guint dispno) 
+ddcbc_display_list_get(ddcbc_display_list *dlist, guint index) 
 {
-	return g_array_index (dlist->list, ddcbc_display*, dispno - 1);
+	return g_array_index (dlist->list, ddcbc_display*, index);
 }
