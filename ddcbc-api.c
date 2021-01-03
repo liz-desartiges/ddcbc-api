@@ -64,6 +64,8 @@ ddcbc_display_set_brightness (ddcbc_display *disp, guint16 new_val)
 
 	disp->last_val = new_val;
     ddca_enable_verify(true);
+
+	return 0;
 }
 
 // ddcbc_display_list is a GArray of ddcbc_displays
